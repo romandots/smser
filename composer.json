@@ -4,6 +4,7 @@
     "type": "library",
     "require": {
         "php": "^8.3",
+        "ext-mbstring": "*",
         "psr/log": "^1.0 || ^2.0 || ^3.0"
     },
     "require-dev": {
@@ -14,11 +15,23 @@
             "Romandots\\Smser\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Romandots\\Smser\\Tests\\": "tests/"
+        }
+    },
     "authors": [
         {
             "name": "romandots",
             "email": "ram.d.kreiz@gmail.com"
         }
     ],
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "scripts": {
+        "test": "phpunit",
+        "test:unit": "phpunit --testsuite=Unit",
+        "test:integration": "phpunit --testsuite=Integration",
+        "test:feature": "phpunit --testsuite=Feature",
+        "test:coverage": "phpunit --coverage-html tests/reports/coverage"
+    }
 }

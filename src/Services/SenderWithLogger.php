@@ -27,7 +27,7 @@ class SenderWithLogger extends SenderServiceDecorator
                 [
                     'phone' => $phone,
                     'message' => $message,
-                    'message_length' => strlen($message),
+                    'message_length' => mb_strlen($message),
                     'message_cost' => $messageCost->messageCost,
                     'remaining_balance' => $messageCost->remainingBalance,
                 ]
@@ -42,7 +42,7 @@ class SenderWithLogger extends SenderServiceDecorator
                     'exception' => get_class($throwable),
                     'phone' => $phone,
                     'message' => $message,
-                    'message_length' => strlen($message),
+                    'message_length' => mb_strlen($message),
                     'message_cost' => $throwable instanceof InsufficientBalance ? $throwable->cost : null,
                     'remaining_balance' => $throwable instanceof InsufficientBalance ? $throwable->balance : null
                 ]

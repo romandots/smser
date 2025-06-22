@@ -10,6 +10,8 @@ readonly class Message
 
     public function __construct(string $value)
     {
+        $value = trim($value);
+
         if (empty($value)) {
             throw new InvalidArgument("Message cannot be empty");
         }
