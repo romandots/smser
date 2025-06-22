@@ -20,22 +20,23 @@ class Smser implements SmserInterface
     {
     }
 
-    public function send(string $phone, $message): MessageCost
+    protected function getSender(): SenderInterface
     {
         if (is_null($this->sender)) {
             $this->sender = SenderFactory::create($this->providerDetermination, $this->logger, $this->options);
         }
 
-        return $this->sender->send($phone, $message);
+        return $this->sender;
+    }
+
+    public function send(string $phone, $message): MessageCost
+    {
+        return $this->getSender()->send($phone, $message);
     }
 
     public function canSend(string $phone, $message): bool
     {
-        if (is_null($this->sender)) {
-            $this->sender = SenderFactory::create($this->providerDetermination, $this->logger, $this->options);
-        }
-
-        return $this->sender->canSend($phone, $message);
+        return $this->getSender()->canSend($phone, $message);
     }
 
     public static function create(): self

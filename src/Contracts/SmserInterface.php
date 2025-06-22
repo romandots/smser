@@ -12,8 +12,6 @@ interface SmserInterface
 
     public function canSend(string $phone, $message): bool;
 
-    public static function create(): self;
-
     public function withLogging(LoggerInterface $logger): self;
 
     public function withRetries(int $maxAttempts = 3, int $retryDelayMs = 1000): self;
