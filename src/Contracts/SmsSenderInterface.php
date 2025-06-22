@@ -12,5 +12,9 @@ use Romandots\Smser\Exceptions\ServiceUnavailable;
  */
 interface SmsSenderInterface
 {
-    public function send(SMS $sms): void;
+    /**
+     * @param SMS $sms
+     * @return float Sent message cost
+     */
+    public function send(SMS $sms): float;
 }

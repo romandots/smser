@@ -20,11 +20,15 @@ readonly class PhoneNumber
             throw new InvalidArgument("Phone number must be numeric");
         }
 
-        if (strlen($value) !== 11) {
-            throw new InvalidArgument("Phone number must be 10 digits");
+        if (strlen($value) === 10 && !str_starts_with($value, '7')) {
+            $value = '7' . $value;
         }
 
-        if (str_starts_with('7', $value)) {
+        if (strlen($value) !== 11) {
+            throw new InvalidArgument("Phone number must be 11 digits");
+        }
+
+        if (str_starts_with($value, '7')) {
             throw new InvalidArgument("Phone number must start with 7");
         }
 

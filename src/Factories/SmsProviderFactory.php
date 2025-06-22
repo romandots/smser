@@ -25,4 +25,9 @@ class SmsProviderFactory
 
         return self::$instances[$provider->value];
     }
+
+    public static function reset(): void
+    {
+        self::$instances = [];
+    }
 }
