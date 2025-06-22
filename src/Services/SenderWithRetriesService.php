@@ -3,65 +3,62 @@
 namespace Romandots\Smser\Services;
 
 use Psr\Log\LoggerInterface;
-use Romandots\Smser\Contracts\ProviderDeterminationInterface;
+use Romandots\Smser\Contracts\SenderInterface;
 use Romandots\Smser\DTO\MessageCost;
-use Romandots\Smser\Exceptions\InsufficientBalance;
-use Romandots\Smser\Exceptions\InvalidArgument;
 use Romandots\Smser\Exceptions\ServiceUnavailable;
-use Romandots\Smser\Exceptions\UnknownProvider;
 
-readonly class SenderWithRetriesService extends SenderService
+class SenderWithRetriesService extends SenderServiceDecorator
 {
-    /** @var array<string, int> */
-    protected array $retries;
-
     public function __construct(
-        protected ProviderDeterminationInterface $providerDeterminationService,
-        protected ?LoggerInterface $logger,
-        protected int $maxTries = 3,
+        SenderInterface $senderService,
+        protected ?LoggerInterface $logger = null,
+        protected int $maxAttempts = 3,
+        protected int $retryDelayMs = 1000
     ) {
-        parent::__construct($providerDeterminationService, $logger);
+        parent::__construct($senderService);
     }
 
-    /**
-     * @param string $phone
-     * @param string $message
-     * @return MessageCost
-     * @throws InvalidArgument
-     * @throws UnknownProvider
-     * @throws InsufficientBalance
-     * @throws ServiceUnavailable
-     * @throws \Throwable
-     */
-    public function sendWithRetries(string $phone, string $message): MessageCost
+    public function send(string $phone, string $message): MessageCost
     {
-        $key = md5("{$phone}:{$message}");
-        if (!isset($this->retries[$key])) {
-            $this->retries[$key] = 0;
-        }
         $lastException = null;
 
-        for ($i = $this->retries[$key]; $i < $this->maxTries; $i++) {
+        for ($attempt = 1; $attempt <= $this->maxAttempts; $attempt++) {
             try {
-                return $this->send($phone, $message);
+                return $this->sender->send($phone, $message);
             } catch (ServiceUnavailable $exception) {
                 $lastException = $exception;
-                $this->logger?->warning("SMS send attempt {$i} failed, retrying...");
-                usleep(1000 * $i);
-            } finally {
-                unset($this->retries[$key]);
+
+                $this->logger?->warning(
+                    "SMS send attempt {$attempt}/{$this->maxAttempts} failed",
+                    [
+                        'phone' => $phone,
+                        'message' => $message,
+                        'error' => $exception->getMessage(),
+                        'attempt' => $attempt,
+                        'max_attempts' => $this->maxAttempts
+                    ]
+                );
+
+                // Don't sleep after the last attempt
+                if ($attempt < $this->maxAttempts) {
+                    $delay = $this->calculateDelay($attempt);
+                    $this->logger?->debug("Waiting {$delay}ms before retry");
+                    usleep($delay * 1000);
+                }
+            } catch (\Throwable $exception) {
+                // Don't retry on other exceptions
+                throw $exception;
             }
         }
 
-        throw $lastException;
+        throw $lastException ?? new ServiceUnavailable('All retry attempts failed');
     }
 
-    public static function create(?LoggerInterface $logger = null, int $maxTries = 3): self
+    /**
+     * Calculate delay with exponential backoff: 1s, 2s, 4s, 8s...
+     */
+    protected function calculateDelay(int $attempt): int
     {
-        return new self(
-            new ProviderDeterminationService(),
-            $logger,
-            $maxTries,
-        );
+        return $this->retryDelayMs * (2 ** ($attempt - 1));
     }
 }

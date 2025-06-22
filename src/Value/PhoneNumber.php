@@ -28,7 +28,7 @@ readonly class PhoneNumber
             throw new InvalidArgument("Phone number must be 11 digits");
         }
 
-        if (str_starts_with($value, '7')) {
+        if (!str_starts_with($value, '7')) {
             throw new InvalidArgument("Phone number must start with 7");
         }
 
