@@ -1,0 +1,34 @@
+<?php
+
+namespace Romandots\Smser\Value;
+
+use Romandots\Smser\Exceptions\InvalidArgument;
+
+readonly class PhoneNumber
+{
+    public string $value;
+
+    public function __construct(string $value)
+    {
+        $value = preg_replace('/\D/', '', $value);
+
+        if (empty($value)) {
+            throw new InvalidArgument("Phone number cannot be empty");
+        }
+
+        if (!is_numeric($value)) {
+            throw new InvalidArgument("Phone number must be numeric");
+        }
+
+        if (strlen($value) !== 10) {
+            throw new InvalidArgument("Phone number must be 10 digits");
+        }
+
+        $this->value = $value;
+    }
+
+    public function __toString(): string
+    {
+        return $this->value;
+    }
+}
