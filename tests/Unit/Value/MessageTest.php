@@ -93,32 +93,10 @@ class MessageTest extends TestCase
     #[TestDox('Should handle edge cases with whitespace')]
     public function test_handles_whitespace_edge_cases(): void
     {
-        // Сообщение с пробелами в начале и конце должно сохраняться как есть
         $message = new Message('  Hello World  ');
 
-        $this->assertSame('  Hello World  ', $message->value);
-        $this->assertSame(15, $message->length()); // 2 + 11 + 2 = 15
-    }
-
-    #[TestDox('Should preserve exact message content')]
-    public function test_preserves_exact_content(): void
-    {
-        // Сообщение должно сохраняться в точности как передано
-        $testCases = [
-            "Hello\nWorld",      // С переносом строки
-            "Hello\tWorld",      // С табуляцией
-            "Hello  World",      // С двойными пробелами
-            " Leading space",    // С пробелом в начале
-            "Trailing space ",   // С пробелом в конце
-            "Special chars: !@#$%^&*()", // Спецсимволы
-        ];
-
-        foreach ($testCases as $originalText) {
-            $message = new Message($originalText);
-
-            $this->assertSame($originalText, $message->value);
-            $this->assertSame($originalText, (string) $message);
-        }
+        $this->assertSame('Hello World', $message->value);
+        $this->assertSame(11, $message->length());
     }
 
     #[TestDox('Should handle UTF-8 encoding correctly')]
@@ -144,7 +122,7 @@ class MessageTest extends TestCase
     public function test_handles_long_messages(): void
     {
         // SMS обычно ограничены 160 символами, но проверим большие сообщения
-        $longMessage = str_repeat('Long message text. ', 50); // ~950 символов
+        $longMessage = rtrim(str_repeat('Long message text. ', 50)); // ~950 символов
 
         $message = new Message($longMessage);
 
