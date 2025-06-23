@@ -75,7 +75,7 @@ readonly class BasicSenderService implements SenderServiceInterface
         $provider = $this->providerFactoryResolver->getProviderFactory($sms->provider);
 
         $balance = $provider->balanceChecker()->checkBalance();
-        $cost = $provider->costCalculator()->calculateMessageCost($sms->message);
+        $cost = $provider->costCalculator()->calculateMessageCost($sms->message->value);
         if ($balance < $cost) {
             throw new InsufficientBalance($balance, $cost);
         }

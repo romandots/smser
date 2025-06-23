@@ -4,6 +4,7 @@ namespace Romandots\Smser\Factories;
 
 use Psr\Log\LoggerInterface;
 use Romandots\Smser\Contracts\ProviderDeterminationInterface;
+use Romandots\Smser\Contracts\ProviderFactoryRegistryInterface;
 use Romandots\Smser\Contracts\ProviderFactoryResolverInterface;
 use Romandots\Smser\Contracts\SenderServiceInterface;
 use Romandots\Smser\Services\BasicSenderService;
@@ -40,7 +41,7 @@ class SenderFactory
         return $sender;
     }
 
-    public static function createConfiguredFactoryResolver(): ProviderFactoryResolverInterface
+    public static function createConfiguredFactoryResolver(): ProviderFactoryRegistryInterface
     {
         $factoryResolver = new ProviderFactoryResolver();
         // $resolver->registerFactory(Provider::MTS, new MtsProviderFactory());
@@ -77,10 +78,6 @@ class SenderFactory
 
     public static function getSupportedProviders(): array
     {
-        $resolver = self::createConfiguredFactoryResolver();
-
-        return $resolver instanceof ProviderFactoryRegistryInterface
-            ? $resolver->getRegisteredProviders()
-            : [];
+        return self::createConfiguredFactoryResolver()->getRegisteredProviders() ?? [];
     }
 }
