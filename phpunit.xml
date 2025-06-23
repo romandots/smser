@@ -27,7 +27,6 @@
         </include>
         <exclude>
             <directory>src/Contracts</directory>
-            <directory>src/Exceptions</directory>
         </exclude>
     </source>
 

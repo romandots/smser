@@ -34,7 +34,7 @@ class BasicSenderServiceTest extends TestCase
     {
         parent::setUp();
 
-        // Создаем все необходимые моки
+        // Create all required mocks
         $this->providerDetermination = $this->createMock(ProviderDeterminationInterface::class);
         $this->factoryResolver = $this->createMock(ProviderFactoryResolverInterface::class);
         $this->providerFactory = $this->createMock(ProviderFactoryInterface::class);
@@ -42,16 +42,10 @@ class BasicSenderServiceTest extends TestCase
         $this->balanceChecker = $this->createMock(BalanceCheckerInterface::class);
         $this->costCalculator = $this->createMock(CostCalculatorInterface::class);
 
-        // Настраиваем базовые связи между моками
+        // Set up the basic mock chain
         $this->setupBasicMockChain();
 
-        // Настраиваем дефолтное поведение для провайдера
-        // Возвращаем реальный enum вместо мока
-        $this->providerDetermination
-            ->method('determineProvider')
-            ->willReturn(Provider::MTS); // Возвращаем реальный enum!
-
-        // Создаем тестируемый сервис
+        // Instantiate the service under test
         $this->service = new BasicSenderService(
             $this->providerDetermination,
             $this->factoryResolver
@@ -61,7 +55,7 @@ class BasicSenderServiceTest extends TestCase
     #[TestDox('Should successfully send SMS when all conditions are met')]
     public function test_successful_sms_sending(): void
     {
-        // Arrange: Настраиваем успешный сценарий
+        // Arrange: configure a successful scenario
         $phone = '79251234567';
         $message = 'Test message';
         $provider = Provider::MTS;
@@ -69,7 +63,7 @@ class BasicSenderServiceTest extends TestCase
         $cost = 2.5;
         $finalBalance = 97.5;
 
-        // Явно настраиваем все моки
+        // Explicitly configure all mocks
         $this->providerDetermination
             ->method('determineProvider')
             ->willReturn($provider);
@@ -92,12 +86,11 @@ class BasicSenderServiceTest extends TestCase
             ->method('send')
             ->willReturn($cost);
 
-        // Act: Выполняем отправку
+        // Act: send the SMS
         $result = $this->service->send($phone, $message);
 
-        // Assert: Проверяем результат
+        // Assert: verify the result
         $this->assertInstanceOf(MessageCost::class, $result);
-        var_dump($cost, $result);exit();
         $this->assertSame($cost, $result->messageCost);
         $this->assertSame($finalBalance, $result->remainingBalance);
     }
@@ -109,10 +102,10 @@ class BasicSenderServiceTest extends TestCase
         $phone = '79251234567';
         $message = 'Test message';
         $provider = Provider::BEELINE;
-        $balance = 1.0;    // Недостаточно
-        $cost = 5.0;       // Дорого
+        $balance = 1.0;    // Not enough funds
+        $cost = 5.0;       // Expensive SMS
 
-        // Переопределяем дефолтное поведение моков для этого теста
+        // Override the default mock behaviour for this test
         $this->providerDetermination
             ->expects($this->atLeastOnce())
             ->method('determineProvider')
@@ -135,7 +128,7 @@ class BasicSenderServiceTest extends TestCase
             ->with($message)
             ->willReturn($cost);
 
-        // Отправка НЕ должна происходить при недостатке баланса
+        // Sending MUST NOT happen with insufficient balance
         $this->smsSender->expects($this->never())->method('send');
 
         // Assert & Act
@@ -164,8 +157,11 @@ class BasicSenderServiceTest extends TestCase
         $phone = '79251234567';
         $emptyMessage = '';
 
-        // Для этого теста не важно, что возвращает провайдер
-        // InvalidArgument должен быть брошен в конструкторе Message
+        // Provider result is irrelevant for this test
+        $this->providerDetermination
+            ->method('determineProvider')
+            ->willReturn(Provider::MTS);
+        // InvalidArgument will be thrown in the Message constructor
         $this->expectException(InvalidArgument::class);
 
         $this->service->send($phone, $emptyMessage);
@@ -177,7 +173,11 @@ class BasicSenderServiceTest extends TestCase
         $phone = '79251234567';
         $whitespaceMessage = '   ';
 
-        // trim() в Message сделает строку пустой
+        // Provider result is irrelevant for this test
+        $this->providerDetermination
+            ->method('determineProvider')
+            ->willReturn(Provider::MTS);
+        // trim() in Message will make the string empty
         $this->expectException(InvalidArgument::class);
 
         $this->service->send($phone, $whitespaceMessage);
@@ -189,7 +189,7 @@ class BasicSenderServiceTest extends TestCase
         $phone = '79251234567';
         $message = 'Test message';
 
-        // Переопределяем дефолтное поведение
+        // Override the default behaviour
         $this->providerDetermination
             ->expects($this->once())
             ->method('determineProvider')
@@ -207,7 +207,7 @@ class BasicSenderServiceTest extends TestCase
         $message = 'Test message';
         $provider = Provider::TELE2;
 
-        // Провайдер определяется, но фабрика не зарегистрирована
+        // Provider is determined but its factory is not registered
         $this->setupProviderDetermination($phone, $provider);
 
         $this->factoryResolver
@@ -231,7 +231,7 @@ class BasicSenderServiceTest extends TestCase
         $this->setupProviderDetermination($phone, $provider);
         $this->setupFactoryResolver($provider);
 
-        // Сервис проверки баланса недоступен
+        // Balance check service is unavailable
         $this->balanceChecker
             ->expects($this->once())
             ->method('checkBalance')
@@ -251,13 +251,13 @@ class BasicSenderServiceTest extends TestCase
         $balance = 100.0;
         $cost = 2.0;
 
-        // Проверка баланса проходит успешно
+        // Balance check succeeds
         $this->setupProviderDetermination($phone, $provider);
         $this->setupFactoryResolver($provider);
         $this->setupBalance($balance);
         $this->setupCost($message, $cost);
 
-        // Но отправка SMS падает
+        // But sending SMS fails
         $this->smsSender
             ->expects($this->once())
             ->method('send')
@@ -293,8 +293,8 @@ class BasicSenderServiceTest extends TestCase
         $phone = '79251234567';
         $message = 'Test message';
         $provider = Provider::TELE2;
-        $balance = 1.0;   // Мало
-        $cost = 10.0;     // Дорого
+        $balance = 1.0;   // Low balance
+        $cost = 10.0;     // Expensive SMS
 
         $this->setupProviderDetermination($phone, $provider);
         $this->setupFactoryResolver($provider);
@@ -312,7 +312,7 @@ class BasicSenderServiceTest extends TestCase
         $phone = '79251234567';
         $message = 'Test message';
 
-        // Переопределяем дефолтное поведение
+        // Override the default behaviour
         $this->providerDetermination
             ->method('determineProvider')
             ->willThrowException(new UnknownProvider('Provider not found'));
@@ -326,17 +326,17 @@ class BasicSenderServiceTest extends TestCase
     public function test_phone_number_normalization(): void
     {
         $phoneVariants = [
-            '9251234567',           // Без кода страны
-            '79251234567',          // С кодом 7
-            '8(925)123-45-67',      // Со старым кодом 8
-            '+7 925 123 45 67',     // Международный формат
+            '9251234567',           // Without country code
+            '79251234567',          // With country code 7
+            '8(925)123-45-67',      // With old prefix 8
+            '+7 925 123 45 67',     // International format
         ];
 
         $message = 'Test message';
         $provider = Provider::MTS;
 
         foreach ($phoneVariants as $phoneInput) {
-            // Все варианты должны нормализоваться к 79251234567
+            // All variants should normalize to 79251234567
             $this->providerDetermination
                 ->expects($this->once())
                 ->method('determineProvider')
@@ -352,7 +352,7 @@ class BasicSenderServiceTest extends TestCase
             $result = $this->service->canSend($phoneInput, $message);
             $this->assertTrue($result, "Failed for phone input: {$phoneInput}");
 
-            // Сбрасываем моки для следующей итерации
+            // Reset mocks for the next iteration
             $this->setUp();
         }
     }
@@ -364,29 +364,29 @@ class BasicSenderServiceTest extends TestCase
         $message = 'Test message';
         $provider = Provider::MTS;
 
-        // Настраиваем моки с ожиданиями порядка вызовов
+        // Configure mocks with call order expectations
         $this->providerDetermination
-            ->expects($this->exactly(2)) // В checkBalance и в buildSms для send
+            ->expects($this->exactly(2)) // In checkBalance and buildSms during send
             ->method('determineProvider')
             ->willReturn($provider);
 
         $this->factoryResolver
-            ->expects($this->exactly(2)) // В checkBalance и в send
+            ->expects($this->exactly(2)) // In checkBalance and send
             ->method('getProviderFactory')
             ->willReturn($this->providerFactory);
 
         $this->balanceChecker
-            ->expects($this->exactly(2)) // В checkBalance и после send
+            ->expects($this->exactly(2)) // In checkBalance and after send
             ->method('checkBalance')
             ->willReturnOnConsecutiveCalls(100.0, 97.5);
 
         $this->costCalculator
-            ->expects($this->once()) // Только в checkBalance
+            ->expects($this->once()) // Only in checkBalance
             ->method('calculateMessageCost')
             ->willReturn(2.5);
 
         $this->smsSender
-            ->expects($this->once()) // В send
+            ->expects($this->once()) // During send
             ->method('send')
             ->willReturn(2.5);
 
@@ -396,16 +396,16 @@ class BasicSenderServiceTest extends TestCase
     }
 
     /**
-     * Настраивает базовые связи между моками с дефолтными значениями
+     * Set up basic mock relationships with default values
      */
     private function setupBasicMockChain(): void
     {
-        // Резолвер возвращает фабрику по умолчанию
+        // Resolver returns the default factory
         $this->factoryResolver
             ->method('getProviderFactory')
             ->willReturn($this->providerFactory);
 
-        // Фабрика возвращает нужные компоненты
+        // Factory returns required components
         $this->providerFactory
             ->method('sender')
             ->willReturn($this->smsSender);
@@ -417,23 +417,10 @@ class BasicSenderServiceTest extends TestCase
         $this->providerFactory
             ->method('costCalculator')
             ->willReturn($this->costCalculator);
-
-        // Дефолтные значения для избежания ошибок
-        $this->balanceChecker
-            ->method('checkBalance')
-            ->willReturn(100.0); // Достаточный баланс по умолчанию
-
-        $this->costCalculator
-            ->method('calculateMessageCost')
-            ->willReturn(1.0); // Низкая стоимость по умолчанию
-
-        $this->smsSender
-            ->method('send')
-            ->willReturn(1.0); // Возвращаем стоимость отправки
     }
 
     /**
-     * Настраивает успешный сценарий отправки SMS
+     * Configure a successful SMS sending scenario
      */
     private function setupSuccessfulSendingScenario(
         string $phone,
@@ -449,21 +436,21 @@ class BasicSenderServiceTest extends TestCase
     }
 
     /**
-     * Настраивает определение провайдера
+     * Configure provider determination
      */
     private function setupProviderDetermination(string $phone, Provider $provider): void
     {
         $this->providerDetermination
             ->method('determineProvider')
             ->with($this->callback(function (PhoneNumber $phoneNumber) use ($phone) {
-                // Проверяем, что номер правильно нормализован
+                // Verify that the phone number is normalized
                 return $phoneNumber->value === (new PhoneNumber($phone))->value;
             }))
             ->willReturn($provider);
     }
 
     /**
-     * Настраивает резолвер фабрик
+     * Configure the factory resolver
      */
     private function setupFactoryResolver(Provider $provider): void
     {
@@ -474,17 +461,17 @@ class BasicSenderServiceTest extends TestCase
     }
 
     /**
-     * Настраивает проверку баланса
+     * Configure balance checking
      */
     private function setupBalance(float $initialBalance, ?float $finalBalance = null): void
     {
         if ($finalBalance !== null) {
-            // Два вызова: в checkBalance и после send
+            // Two calls: in checkBalance and after send
             $this->balanceChecker
                 ->method('checkBalance')
                 ->willReturnOnConsecutiveCalls($initialBalance, $finalBalance);
         } else {
-            // Один вызов: только в checkBalance
+            // One call: only in checkBalance
             $this->balanceChecker
                 ->method('checkBalance')
                 ->willReturn($initialBalance);
@@ -492,18 +479,18 @@ class BasicSenderServiceTest extends TestCase
     }
 
     /**
-     * Настраивает расчет стоимости
+     * Configure message cost calculation
      */
     private function setupCost(string $message, float $cost): void
     {
         $this->costCalculator
             ->method('calculateMessageCost')
-            ->with($message) // ИСПРАВЛЕНО: передаем строку, а не объект Message
+            ->with($message)
             ->willReturn($cost);
     }
 
     /**
-     * Настраивает стоимость и отправку
+     * Configure cost calculation and sending
      */
     private function setupCostAndSending(float $cost): void
     {
