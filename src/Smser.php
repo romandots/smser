@@ -23,6 +23,7 @@ class Smser implements SmserInterface
         ?callable $customProvidersCallable = null,
         protected ?LoggerInterface $logger = null,
         protected array $options = [],
+        protected array $config = [],
     ) {
         $this->customProvidersCallable = $customProvidersCallable;
     }
@@ -46,6 +47,14 @@ class Smser implements SmserInterface
     public static function create(): self
     {
         return new self();
+    }
+
+    public function withConfig(array $config): self
+    {
+        $this->config = $config;
+        $this->invalidateSender();
+
+        return $this;
     }
 
     /**
@@ -118,6 +127,7 @@ class Smser implements SmserInterface
             null,
             $this->logger,
             $this->options,
+            $this->config,
         );
     }
 
