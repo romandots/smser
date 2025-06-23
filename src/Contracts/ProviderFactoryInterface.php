@@ -2,7 +2,7 @@
 
 namespace Romandots\Smser\Contracts;
 
-interface SmsProviderFactoryInterface
+interface ProviderFactoryInterface
 {
     public function sender(): SmsSenderInterface;
 

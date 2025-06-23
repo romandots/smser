@@ -2,16 +2,16 @@
 
 namespace Romandots\Smser\Factories;
 
-use Romandots\Smser\Contracts\SmsProviderFactoryInterface;
+use Romandots\Smser\Contracts\ProviderFactoryInterface;
 use Romandots\Smser\Exceptions\UnknownProvider;
 use Romandots\Smser\Value\Provider;
 
 class SmsProviderFactory
 {
-    /** @var array<Provider, SmsProviderFactoryInterface>  */
+    /** @var array<Provider, ProviderFactoryInterface>  */
     protected static array $instances = [];
 
-    public static function getInstance(Provider $provider): SmsProviderFactoryInterface
+    public static function getInstance(Provider $provider): ProviderFactoryInterface
     {
         if (!isset(self::$instances[$provider->value])) {
             self::$instances[$provider->value] = match($provider) {

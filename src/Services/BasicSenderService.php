@@ -3,7 +3,7 @@
 namespace Romandots\Smser\Services;
 
 use Romandots\Smser\Contracts\ProviderDeterminationInterface;
-use Romandots\Smser\Contracts\SenderInterface;
+use Romandots\Smser\Contracts\SenderServiceInterface;
 use Romandots\Smser\DTO\MessageCost;
 use Romandots\Smser\DTO\SMS;
 use Romandots\Smser\Exceptions\InsufficientBalance;
@@ -14,7 +14,7 @@ use Romandots\Smser\Factories\SmsProviderFactory;
 use Romandots\Smser\Value\Message;
 use Romandots\Smser\Value\PhoneNumber;
 
-readonly class SenderService implements SenderInterface
+readonly class BasicSenderService implements SenderServiceInterface
 {
     public function __construct(
         protected ProviderDeterminationInterface $providerDeterminationService,

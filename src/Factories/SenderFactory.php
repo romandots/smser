@@ -4,9 +4,9 @@ namespace Romandots\Smser\Factories;
 
 use Psr\Log\LoggerInterface;
 use Romandots\Smser\Contracts\ProviderDeterminationInterface;
-use Romandots\Smser\Contracts\SenderInterface;
-use Romandots\Smser\Services\SenderService;
-use Romandots\Smser\Services\SenderWithLogger;
+use Romandots\Smser\Contracts\SenderServiceInterface;
+use Romandots\Smser\Services\BasicSenderService;
+use Romandots\Smser\Services\SenderWithLoggerService;
 use Romandots\Smser\Services\SenderWithRetriesService;
 
 class SenderFactory
@@ -15,8 +15,8 @@ class SenderFactory
         ?ProviderDeterminationInterface $providerDetermination = null,
         ?LoggerInterface $logger = null,
         array $options = [],
-    ): SenderInterface {
-        $sender = new SenderService($providerDetermination);
+    ): SenderServiceInterface {
+        $sender = new BasicSenderService($providerDetermination);
 
         if ($options['withRetries'] ?? false) {
             $sender = new SenderWithRetriesService(
@@ -28,7 +28,7 @@ class SenderFactory
         }
 
         if (($options['withExtraLogging'] ?? false) && $logger) {
-            $sender = new SenderWithLogger($sender, $logger);
+            $sender = new SenderWithLoggerService($sender, $logger);
         }
 
         return $sender;

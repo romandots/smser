@@ -3,14 +3,14 @@
 namespace Romandots\Smser\Services;
 
 use Psr\Log\LoggerInterface;
-use Romandots\Smser\Contracts\SenderInterface;
+use Romandots\Smser\Contracts\SenderServiceInterface;
 use Romandots\Smser\DTO\MessageCost;
 use Romandots\Smser\Exceptions\InsufficientBalance;
 
-class SenderWithLogger extends SenderServiceDecorator
+class SenderWithLoggerService extends SenderServiceDecorator
 {
     public function __construct(
-        SenderInterface $sender,
+        SenderServiceInterface $sender,
         protected ?LoggerInterface $logger,
     ) {
         parent::__construct($sender);

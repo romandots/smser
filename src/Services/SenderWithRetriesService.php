@@ -3,14 +3,14 @@
 namespace Romandots\Smser\Services;
 
 use Psr\Log\LoggerInterface;
-use Romandots\Smser\Contracts\SenderInterface;
+use Romandots\Smser\Contracts\SenderServiceInterface;
 use Romandots\Smser\DTO\MessageCost;
 use Romandots\Smser\Exceptions\ServiceUnavailable;
 
 class SenderWithRetriesService extends SenderServiceDecorator
 {
     public function __construct(
-        SenderInterface $senderService,
+        SenderServiceInterface $senderService,
         protected ?LoggerInterface $logger = null,
         protected int $maxAttempts = 3,
         protected int $retryDelayMs = 1000

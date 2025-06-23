@@ -4,7 +4,7 @@ namespace Romandots\Smser;
 
 use Psr\Log\LoggerInterface;
 use Romandots\Smser\Contracts\ProviderDeterminationInterface;
-use Romandots\Smser\Contracts\SenderInterface;
+use Romandots\Smser\Contracts\SenderServiceInterface;
 use Romandots\Smser\Contracts\SmserInterface;
 use Romandots\Smser\DTO\MessageCost;
 use Romandots\Smser\Exceptions\InvalidArgument;
@@ -12,7 +12,7 @@ use Romandots\Smser\Factories\SenderFactory;
 
 class Smser implements SmserInterface
 {
-    protected ?SenderInterface $sender = null;
+    protected ?SenderServiceInterface $sender = null;
     protected ?LoggerInterface $logger = null;
     protected array $options = [];
 
@@ -20,7 +20,7 @@ class Smser implements SmserInterface
     {
     }
 
-    protected function getSender(): SenderInterface
+    protected function getSender(): SenderServiceInterface
     {
         if (is_null($this->sender)) {
             $this->sender = SenderFactory::create($this->providerDetermination, $this->logger, $this->options);

@@ -2,13 +2,13 @@
 
 namespace Romandots\Smser\Services;
 
-use Romandots\Smser\Contracts\SenderInterface;
+use Romandots\Smser\Contracts\SenderServiceInterface;
 use Romandots\Smser\DTO\MessageCost;
 
-class SenderServiceDecorator implements SenderInterface
+abstract class SenderServiceDecorator implements SenderServiceInterface
 {
 
-    public function __construct(protected SenderInterface $sender)
+    public function __construct(protected SenderServiceInterface $sender)
     {
     }
 
