@@ -8,9 +8,9 @@ use Romandots\Smser\DTO\MessageCost;
 interface SmserInterface
 {
 
-    public function send(string $phone, $message): MessageCost;
+    public function send(string $phone, string $message): MessageCost;
 
-    public function canSend(string $phone, $message): bool;
+    public function canSend(string $phone, string $message): bool;
 
     public function withLogging(LoggerInterface $logger): self;
 

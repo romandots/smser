@@ -3,6 +3,7 @@
 namespace Romandots\Smser\Services;
 
 use Romandots\Smser\Contracts\ProviderDeterminationInterface;
+use Romandots\Smser\Contracts\ProviderFactoryResolverInterface;
 use Romandots\Smser\Contracts\SenderServiceInterface;
 use Romandots\Smser\DTO\MessageCost;
 use Romandots\Smser\DTO\SMS;
@@ -18,6 +19,7 @@ readonly class BasicSenderService implements SenderServiceInterface
 {
     public function __construct(
         protected ProviderDeterminationInterface $providerDeterminationService,
+        protected ProviderFactoryResolverInterface $providerFactoryResolver,
     ) {
     }
 
@@ -36,7 +38,7 @@ readonly class BasicSenderService implements SenderServiceInterface
         $this->checkBalance($phone, $message);
 
         $sms = $this->buildSms($phone, $message);
-        $provider = SmsProviderFactory::getInstance($sms->provider);
+        $provider = $this->providerFactoryResolver->getProviderFactory($sms->provider);
         $cost = $provider->sender()->send($sms);
         $balance = $provider->balanceChecker()->checkBalance();
 
@@ -70,7 +72,7 @@ readonly class BasicSenderService implements SenderServiceInterface
     protected function checkBalance(string $phone, string $message): void
     {
         $sms = $this->buildSms($phone, $message);
-        $provider = SmsProviderFactory::getInstance($sms->provider);
+        $provider = $this->providerFactoryResolver->getProviderFactory($sms->provider);
 
         $balance = $provider->balanceChecker()->checkBalance();
         $cost = $provider->costCalculator()->calculateMessageCost($sms->message);
