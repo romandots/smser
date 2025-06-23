@@ -86,9 +86,4 @@ class SenderFactory
 
         return self::create($providerDetermination, $resolver, $logger, $options);
     }
-
-    public static function getSupportedProviders(): array
-    {
-        return self::createConfiguredFactoryResolver()->getRegisteredProviders() ?? [];
-    }
 }

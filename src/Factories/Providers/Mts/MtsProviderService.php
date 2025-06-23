@@ -19,16 +19,22 @@ class MtsProviderService implements SmsSenderInterface, BalanceCheckerInterface,
 
     public function checkBalance(): float
     {
-        // TODO: Implement checkBalance() method.
+        return $this->client->getBalance();
     }
 
     public function calculateMessageCost(string $message): float
     {
-        // TODO: Implement calculateMessageCost() method.
+        $length = mb_strlen($message);
+        $segmentSize = preg_match('/[^\x00-\x7F]/u', $message) ? 70 : 160;
+        $segments = (int) ceil($length / $segmentSize);
+
+        return $segments * 2.0; // simple fixed rate per segment
     }
 
     public function send(SMS $sms): float
     {
-        // TODO: Implement send() method.
+        $this->client->sendSms($sms->phoneNumber->value, $sms->message->value);
+
+        return $this->calculateMessageCost($sms->message->value);
     }
 }

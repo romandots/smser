@@ -80,15 +80,4 @@ class SenderFactoryTest extends TestCase
         $result = $service->send('79251234567', 'hello');
         $this->assertInstanceOf(MessageCost::class, $result);
     }
-
-    #[TestDox('Should return supported providers list')]
-    public function test_get_supported_providers(): void
-    {
-        $providers = SenderFactory::getSupportedProviders();
-
-        $this->assertContains(Provider::MTS, $providers);
-        $this->assertContains(Provider::BEELINE, $providers);
-        $this->assertContains(Provider::MEGAFON, $providers);
-        $this->assertContains(Provider::TELE2, $providers);
-    }
 }
