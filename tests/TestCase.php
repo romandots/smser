@@ -3,17 +3,9 @@
 namespace Romandots\Smser\Tests;
 
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
-use Romandots\Smser\Factories\SmsProviderFactory;
 
 class TestCase extends PHPUnitTestCase
 {
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        SmsProviderFactory::reset();
-    }
-
     public function createMockWithMethods(string $className, array $methods): object
     {
         $mock = $this->createMock($className);
