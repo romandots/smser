@@ -17,10 +17,6 @@ readonly class PhoneNumber
             throw new InvalidArgument("Phone number cannot be empty");
         }
 
-        if (!is_numeric($value)) {
-            throw new InvalidArgument("Phone number must be numeric");
-        }
-
         if (strlen($value) === 10 && !str_starts_with($value, self::COUNTRY_CODE)) {
             $value = self::COUNTRY_CODE . $value;
         }
