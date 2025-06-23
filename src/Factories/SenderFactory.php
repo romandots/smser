@@ -7,11 +7,13 @@ use Romandots\Smser\Contracts\ProviderDeterminationInterface;
 use Romandots\Smser\Contracts\ProviderFactoryRegistryInterface;
 use Romandots\Smser\Contracts\ProviderFactoryResolverInterface;
 use Romandots\Smser\Contracts\SenderServiceInterface;
+use Romandots\Smser\Factories\Providers\Test\TestProviderFactory;
 use Romandots\Smser\Services\BasicSenderService;
 use Romandots\Smser\Services\ProviderDeterminationService;
 use Romandots\Smser\Services\ProviderFactoryResolver;
 use Romandots\Smser\Services\SenderWithLoggerService;
 use Romandots\Smser\Services\SenderWithRetriesService;
+use Romandots\Smser\Value\Provider;
 
 class SenderFactory
 {
@@ -44,7 +46,12 @@ class SenderFactory
     public static function createConfiguredFactoryResolver(): ProviderFactoryRegistryInterface
     {
         $factoryResolver = new ProviderFactoryResolver();
-        // $resolver->registerFactory(Provider::MTS, new MtsProviderFactory());
+
+        // @todo Implement real clients
+        $factoryResolver->registerFactory(Provider::MTS, new TestProviderFactory());
+        $factoryResolver->registerFactory(Provider::BEELINE, new TestProviderFactory());
+        $factoryResolver->registerFactory(Provider::MEGAFON, new TestProviderFactory());
+        $factoryResolver->registerFactory(Provider::TELE2, new TestProviderFactory());
 
         return $factoryResolver;
     }

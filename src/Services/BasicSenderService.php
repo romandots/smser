@@ -11,7 +11,6 @@ use Romandots\Smser\Exceptions\InsufficientBalance;
 use Romandots\Smser\Exceptions\InvalidArgument;
 use Romandots\Smser\Exceptions\ServiceUnavailable;
 use Romandots\Smser\Exceptions\UnknownProvider;
-use Romandots\Smser\Factories\SmsProviderFactory;
 use Romandots\Smser\Value\Message;
 use Romandots\Smser\Value\PhoneNumber;
 
